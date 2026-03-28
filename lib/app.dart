@@ -12,6 +12,7 @@ class RideBookingApp extends StatelessWidget {
       title: 'Đặt xe',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
+      // B2: `home` trỏ tới widget có StreamBuilder auth — không dùng go_router v.v.
       home: const AuthGate(),
     );
   }

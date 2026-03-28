@@ -1,0 +1,74 @@
+[
+  {
+    "pickupLat": 10.7769,
+    "pickupLng": 106.7009,
+    "dropoffLat": 10.8231,
+    "dropoffLng": 106.6297,
+    "distanceKm": 8.42,
+    "priceVnd": 52000,
+    "vehicleType": "bike",
+    "status": "completed",
+    "createdAt": "2026-03-18T02:30:00.000Z",
+    "updatedAt": "2026-03-18T03:05:00.000Z"
+  },
+  {
+    "pickupLat": 10.7626,
+    "pickupLng": 106.6602,
+    "dropoffLat": 10.7296,
+    "dropoffLng": 106.6173,
+    "distanceKm": 5.1,
+    "priceVnd": 34500,
+    "vehicleType": "bike",
+    "status": "completed",
+    "createdAt": "2026-03-19T08:15:00.000Z",
+    "updatedAt": "2026-03-19T08:40:00.000Z"
+  },
+  {
+    "pickupLat": 10.775,
+    "pickupLng": 106.702,
+    "dropoffLat": 10.78,
+    "dropoffLng": 106.71,
+    "distanceKm": 1.2,
+    "priceVnd": 18000,
+    "vehicleType": "car",
+    "status": "accepted",
+    "createdAt": "2026-03-25T10:00:00.000Z",
+    "updatedAt": "2026-03-25T10:02:00.000Z"
+  },
+  {
+    "pickupLat": 10.79,
+    "pickupLng": 106.705,
+    "dropoffLat": 10.8,
+    "dropoffLng": 106.68,
+    "distanceKm": 3.8,
+    "priceVnd": 41000,
+    "vehicleType": "car",
+    "status": "finding_driver",
+    "createdAt": "2026-03-27T04:00:00.000Z",
+    "updatedAt": "2026-03-27T04:00:00.000Z"
+  },
+  {
+    "pickupLat": 10.73,
+    "pickupLng": 106.72,
+    "dropoffLat": 10.75,
+    "dropoffLng": 106.65,
+    "distanceKm": 12.0,
+    "priceVnd": 78500,
+    "vehicleType": "bike",
+    "status": "cancelled",
+    "createdAt": "2026-03-10T12:00:00.000Z",
+    "updatedAt": "2026-03-10T12:10:00.000Z"
+  },
+  {
+    "pickupLat": 10.769,
+    "pickupLng": 106.695,
+    "dropoffLat": 10.782,
+    "dropoffLng": 106.698,
+    "distanceKm": 2.5,
+    "priceVnd": 20500,
+    "vehicleType": "bike",
+    "status": "in_progress",
+    "createdAt": "2026-03-27T06:30:00.000Z",
+    "updatedAt": "2026-03-27T06:35:00.000Z"
+  }
+]

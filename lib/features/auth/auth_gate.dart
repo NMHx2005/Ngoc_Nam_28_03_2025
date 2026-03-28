@@ -1,10 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import '../home/home_shell.dart';
+import '../home/home_screen.dart';
 import 'login_screen.dart';
 
-/// Cổng theo stream đăng nhập: chưa login → Login, đã login → Home.
+/// Cổng điều hướng theo phiên đăng nhập Firebase.
+///
+/// Dùng [FirebaseAuth.authStateChanges] vì mỗi khi đăng nhập/đăng xuất/session hết hạn,
+/// Firebase phát sự kiện mới — UI tự đồng bộ, không cần gọi Navigator thủ công.
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
 
@@ -19,7 +22,7 @@ class AuthGate extends StatelessWidget {
           );
         }
         if (snapshot.hasData) {
-          return const HomeShell();
+          return const HomeScreen();
         }
         return const LoginScreen();
       },

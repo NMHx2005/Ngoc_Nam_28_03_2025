@@ -128,9 +128,11 @@ Google Maps Platform thường **yêu cầu** tài khoản thanh toán (billing)
 
 ### B7. Gắn key vào app Flutter (không commit lên Git)
 
-1. Trong thư mục `android/app/src/main/res/values/`, **copy** file mẫu:
+1. **Copy** file mẫu `android/app/api_keys.xml.example` thành:
 
-   `api_keys.xml.example` → `api_keys.xml`
+   `android/app/src/main/res/values/api_keys.xml`
+
+   (File mẫu **không** đặt trong `res/values/` vì Gradle chỉ chấp nhận tên kết thúc `.xml` trong thư mục đó.)
 
 2. Mở **`api_keys.xml`** (file này đã nằm trong `.gitignore`, không đẩy lên Git) và thay `YOUR_ANDROID_MAPS_API_KEY` bằng API key thật.
 

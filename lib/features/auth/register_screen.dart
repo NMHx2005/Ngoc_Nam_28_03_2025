@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import 'auth_messages.dart';
+import 'auth_validators.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -59,23 +60,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   controller: _email,
                   keyboardType: TextInputType.emailAddress,
                   decoration: const InputDecoration(labelText: 'Email'),
-                  validator: (v) {
-                    if (v == null || v.trim().isEmpty) return 'Nhập email';
-                    if (!v.contains('@')) return 'Email không hợp lệ';
-                    return null;
-                  },
+                  validator: AuthValidators.email,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _password,
                   obscureText: true,
                   decoration: const InputDecoration(labelText: 'Mật khẩu'),
-                  validator: (v) {
-                    if (v == null || v.length < 6) {
-                      return 'Mật khẩu tối thiểu 6 ký tự';
-                    }
-                    return null;
-                  },
+                  validator: AuthValidators.password,
                 ),
                 const SizedBox(height: 24),
                 FilledButton(

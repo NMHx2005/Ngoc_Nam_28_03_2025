@@ -18,13 +18,13 @@ Project đã cấu hình `.gitignore` để **không** đẩy lên remote các n
 **File mẫu được phép commit** (không chứa secret thật):
 
 - `android/app/google-services.json.example`
-- `android/app/src/main/res/values/api_keys.xml.example`
+- `android/app/api_keys.xml.example` (mẫu ngoài `res/` — tránh lỗi merge resource)
 
 ---
 
 ## Thành viên mới clone về máy
 
-1. Copy `api_keys.xml.example` → `api_keys.xml`, dán **Maps API key**.
+1. Copy `android/app/api_keys.xml.example` → `android/app/src/main/res/values/api_keys.xml`, dán **Maps API key**.
 2. Tải `google-services.json` từ Firebase Console → đặt vào `android/app/`.
 3. Chạy `flutter pub get` và `flutter run`.
 
@@ -69,7 +69,7 @@ git push -u origin main
 
 ## Gợi ý README trên GitHub
 
-Ghi rõ: *“Sao chép `api_keys.xml.example` → `api_keys.xml` và thêm `google-services.json` theo `HUONG_DAN_SETUP_FIREBASE_VA_MAPS.md`.”*
+Ghi rõ: *“Sao chép `android/app/api_keys.xml.example` → `res/values/api_keys.xml` và thêm `google-services.json` theo `HUONG_DAN_SETUP_FIREBASE_VA_MAPS.md`.”*
 
 ---
 

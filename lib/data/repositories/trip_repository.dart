@@ -25,9 +25,10 @@ class TripRepository {
     return doc.id;
   }
 
-  Stream<List<Trip>> watchMyTrips() {
-    final uid = _auth.currentUser?.uid;
-    if (uid == null) {
+  /// Luồng chuyến của user [uid], mới nhất trước (sort client-side, không cần index phức tạp).
+  Stream<List<Trip>> watchMyTrips(String uid) {
+    final current = _auth.currentUser?.uid;
+    if (current == null || current != uid) {
       return const Stream.empty();
     }
     return _trips.where('userId', isEqualTo: uid).snapshots().map((snap) {

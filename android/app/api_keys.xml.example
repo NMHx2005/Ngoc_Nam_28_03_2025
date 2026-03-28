@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Sao chép file này thành: android/app/src/main/res/values/api_keys.xml -->
+    <!-- (Gradle chỉ chấp nhận *.xml trong res/values — không đặt file .example trong đó.) -->
+    <string name="google_maps_key" translatable="false">YOUR_ANDROID_MAPS_API_KEY</string>
+</resources>

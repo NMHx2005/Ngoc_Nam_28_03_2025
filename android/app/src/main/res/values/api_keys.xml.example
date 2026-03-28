@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- Đổi tên file thành api_keys.xml (cùng thư mục) và dán API key Maps SDK for Android -->
-    <string name="google_maps_key" translatable="false">YOUR_ANDROID_MAPS_API_KEY</string>
-</resources>
