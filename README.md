@@ -22,7 +22,7 @@ Khi nộp báo cáo hoặc đẩy lên GitHub, nên thay ảnh dưới bằng **
 |------------|---------|
 | **Flutter SDK** | Kênh *stable*, tương thích **Dart ^3.11** (theo `pubspec.yaml`) |
 | **Android Studio** / SDK | **minSdk 24** (`android/app/build.gradle.kts`), thiết bị ảo hoặc máy thật bật USB debugging |
-| **Tài khoản Google** | [Firebase Console](https://console.firebase.google.com/) (Auth + Firestore), [Google Cloud Console](https://console.cloud.google.com/) (bật Maps SDK for Android, tuỳ chọn Directions API) |
+| **Tài khoản Google** | [Firebase Console](https://console.firebase.google.com/) (Auth + Firestore), [Google Cloud Console](https://console.cloud.google.com/) (bật Maps SDK for Android, tuỳ chọn Directions API / Places API / Geocoding API) |
 
 Có thể chạy thêm trên **iOS / macOS / Windows / Linux** nhờ khung đa nền tảng của Flutter; hướng dẫn dưới đây tập trung **Android** (cấu hình Firebase + Maps đã gắn với module `android/`).
 
@@ -58,6 +58,24 @@ flutter run --dart-define=DIRECTIONS_API_KEY=YOUR_KEY_HERE
 ```
 
 Cần bật **Directions API** trên Google Cloud và hạn chế key phù hợp.
+
+### 3.4. Tuỳ chọn: tìm địa chỉ (Places Autocomplete + Geocoding)
+
+Để tìm điểm đón/điểm đến bằng văn bản trong app, truyền thêm key REST:
+
+```bash
+flutter run --dart-define=PLACES_API_KEY=YOUR_KEY_HERE
+```
+
+Cần bật **Places API** và **Geocoding API** trên Google Cloud.
+
+Có thể chạy cùng Directions:
+
+```bash
+flutter run \
+  --dart-define=PLACES_API_KEY=YOUR_KEY_HERE \
+  --dart-define=DIRECTIONS_API_KEY=YOUR_KEY_HERE
+```
 
 **Chi tiết từng bước (billing, rule Firestore, v.v.):** [`HUONG_DAN_SETUP_FIREBASE_VA_MAPS.md`](HUONG_DAN_SETUP_FIREBASE_VA_MAPS.md).
 
@@ -143,6 +161,7 @@ ride_booking/
 
 - Đăng ký / đăng nhập **email + mật khẩu**, validate form, `AuthGate` điều hướng.
 - **Bản đồ** Google Maps, quyền vị trí, marker điểm đón (xanh) / điểm đến (đỏ), polyline mặc định **đoạn thẳng**; tuỳ chọn **Directions API** qua `--dart-define`.
+- **Tìm địa chỉ** cho điểm đón/điểm đến bằng **Places Autocomplete**, fallback **Geocoding** khi nhập địa chỉ tự do (qua `--dart-define=PLACES_API_KEY`).
 - Tính **khoảng cách** Haversine; **giá VND** (mở cửa, km, km đầu miễn phí, giờ cao điểm, làm tròn bội số).
 - **Đặt chuyến:** bottom sheet xác nhận, `createTrip` trạng thái `finding_driver`, chuyển màn chi tiết; chống double submit / hiển thị loading.
 - **Chi tiết chuyến:** stream Firestore, nút giả lập **tài xế nhận** / **hoàn thành**.
@@ -154,7 +173,6 @@ ride_booking/
 - Ứng dụng **tài xế** thật, phân phối chuyến, chat.
 - **Thanh toán** (ví, thẻ, ví điện tử).
 - **Thông báo đẩy** (FCM) khi có tài xế / hết thời gian chờ.
-- **Tìm địa chỉ** (Places Autocomplete), geocoding địa chỉ văn bản.
 - **Đánh giá** sau chuyến, khuyến mãi, nhiều loại dịch vụ.
 - Triển khai đầy đủ **iOS** (Maps + Firebase) nếu chưa cấu hình `GoogleService-Info.plist` và key tương ứng.
 

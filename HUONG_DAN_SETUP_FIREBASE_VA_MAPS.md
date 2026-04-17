@@ -25,10 +25,56 @@ Tài liệu dành cho project **ride_booking** (Flutter). **Package Android bắ
 
 **Lấy SHA-1 debug (khi cần):**
 
+File ký **debug** mặc định nằm tại `~/.android/debug.keystore` (Windows: `%USERPROFILE%\.android\debug.keystore`). Nếu chưa có, chạy **`flutter run`** lên thiết bị/emulator **Android** một lần (hoặc `flutter build apk --debug`) để hệ thống tạo keystore.
+
+---
+
+**Cách 1 — `keytool` (khuyến nghị khi máy chỉ có JDK 17)**
+
+`keytool` đi kèm JDK 17; **không** phụ thuộc phiên bản JVM mà Gradle yêu cầu (Gradle/AGP đôi khi bắt chạy bằng **JDK 21**, nhưng bytecode app vẫn target **Java 17** trong `android/app/build.gradle.kts`).
+
+*Tìm dòng **SHA1:** trong output và copy chuỗi `AA:BB:...`.*
+
+**Windows (PowerShell)** — có thể chạy ở bất kỳ thư mục nào:
+
+```powershell
+keytool -list -v -keystore "$env:USERPROFILE\.android\debug.keystore" -alias androiddebugkey -storepass android -keypass android
+```
+
+Nếu `keytool` không có trong PATH, dùng JDK đã cài (ví dụ Android Studio `jbr`):
+
+```powershell
+& "$env:JAVA_HOME\bin\keytool.exe" -list -v -keystore "$env:USERPROFILE\.android\debug.keystore" -alias androiddebugkey -storepass android -keypass android
+```
+
+**macOS / Linux:**
+
+```bash
+keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android
+```
+
+---
+
+**Cách 2 — Gradle `signingReport`**
+
+Bản **Gradle** kèm project có thể yêu cầu **JDK 21** để chạy lệnh; nếu máy chỉ có JDK 17 và lệnh báo lỗi JVM, dùng **Cách 1**.
+
+**macOS / Linux** (trong thư mục `android`):
+
 ```bash
 cd android
 ./gradlew signingReport
 ```
+
+**Windows** (PowerShell, **đang đứng trong** thư mục `android` của project):
+
+```powershell
+$env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"
+$env:Path = "$env:JAVA_HOME\bin;$env:Path"
+.\gradlew.bat signingReport
+```
+
+(Sửa đường dẫn `JAVA_HOME` nếu Android Studio cài chỗ khác; hoặc trỏ tới JDK 21 nếu Gradle yêu cầu.)
 
 Tìm mục **Variant: debug** → copy dòng **SHA1** (dạng `AA:BB:...`).
 
@@ -91,11 +137,16 @@ Google Maps Platform thường **yêu cầu** tài khoản thanh toán (billing)
 - Đây là yêu cầu chống lạm dụng; đồ án nhỏ thường nằm trong **hạn mức miễn phí / credit** của Maps (xem [Pricing](https://developers.google.com/maps/billing-and-pricing/pricing)).
 - Nên tạo **Budget + cảnh báo** (Billing → Budgets) để tránh bất ngờ.
 
-### B2. Bật API: Maps SDK for Android
+### B2. Bật API: Maps SDK for Android (+ API tuỳ chọn cho tìm địa chỉ)
 
 1. **APIs & Services** → **Library** (Thư viện).
 2. Tìm **`Maps SDK for Android`**.
 3. Vào kết quả → **Enable** (Bật).
+4. Nếu muốn tìm địa chỉ bằng văn bản trong app, bật thêm:
+   - **Places API**
+   - **Geocoding API**
+5. Nếu muốn vẽ lộ trình đường bộ, bật thêm:
+   - **Directions API**
 
 **Quan trọng:** Phải **Enable** API này **trước**, khi hạn chế API key (B4) mới thấy tên **Maps SDK for Android** trong danh sách.
 
@@ -110,7 +161,7 @@ Google Maps Platform thường **yêu cầu** tài khoản thanh toán (billing)
 1. **Application restrictions** → chọn **Android apps**.
 2. **Add an item:**
    - **Package name:** `com.dongasia.it3237.ride_booking`
-   - **SHA-1 certificate fingerprint:** SHA-1 **debug** (lấy bằng `./gradlew signingReport` như mục A2).
+   - **SHA-1 certificate fingerprint:** SHA-1 **debug** (lấy theo **mục A2**: ưu tiên **`keytool`** nếu máy chỉ có JDK 17; hoặc **`.\gradlew.bat signingReport`** trên Windows / **`./gradlew signingReport`** trên macOS khi JVM chạy Gradle đủ mới, ví dụ JDK 21).
 
 *(Khi build release lên CH Play, thêm một dòng nữa với SHA-1 của keystore upload.)*
 
@@ -160,11 +211,22 @@ Google Maps Platform thường **yêu cầu** tài khoản thanh toán (billing)
 2. **Đăng ký** tài khoản mới → **đăng nhập** → tab **Bản đồ** hiển thị bản đồ (không xám toàn màn hình).
 3. **Đặt xe** → Firebase Console → **Firestore** → **Data** → collection **`trips`** có document mới.
 
+### C1. Chạy kèm key cho tìm địa chỉ / route (tuỳ chọn)
+
+```bash
+flutter run \
+  --dart-define=PLACES_API_KEY=YOUR_KEY_HERE \
+  --dart-define=DIRECTIONS_API_KEY=YOUR_KEY_HERE
+```
+
+Nếu chỉ cần tìm địa chỉ, có thể bỏ `DIRECTIONS_API_KEY`.
+
 ### Lỗi thường gặp
 
 | Hiện tượng | Hướng xử lý |
 |------------|-------------|
 | Map trắng / “API key not valid” | Kiểm tra key trong `api_keys.xml`, đã Enable **Maps SDK for Android**, billing đã bật, **Application restrictions** đúng package + SHA-1 debug đang dùng để cài app. |
+| Gõ địa chỉ nhưng không có gợi ý | Kiểm tra đã truyền `--dart-define=PLACES_API_KEY=...`, key có quyền **Places API** + **Geocoding API**, và chưa bị giới hạn API sai. |
 | `PERMISSION_DENIED` Firestore | Đã **Publish** `firestore.rules`? User đã **đăng nhập**? `userId` trong document có khớp `uid` không? |
 | Auth lỗi | **Email/Password** đã bật? `google-services.json` đúng project + đúng package? |
 
