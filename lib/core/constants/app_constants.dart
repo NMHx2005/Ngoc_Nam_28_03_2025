@@ -2,6 +2,8 @@
 abstract class TripStatuses {
   static const findingDriver = 'finding_driver';
   static const accepted = 'accepted';
+  /// Demo: tài xế đã nhận và đang tới điểm đón.
+  static const driverArriving = 'driver_arriving';
   static const inProgress = 'in_progress';
   static const completed = 'completed';
   static const cancelled = 'cancelled';

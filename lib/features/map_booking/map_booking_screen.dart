@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -14,7 +12,6 @@ import '../../models/trip.dart';
 import '../trip_detail/trip_detail_screen.dart';
 import 'directions_route_service.dart';
 import 'map_route_polylines.dart';
-import 'places_search_service.dart';
 
 class _BookingDraft {
   const _BookingDraft({required this.priceVnd, required this.vehicleType});
@@ -141,221 +138,11 @@ class _TripBookingBottomSheetState extends State<_TripBookingBottomSheet> {
 /// TP.HCM — vị trí mặc định khi chưa lấy được GPS.
 const LatLng _fallbackCenter = LatLng(10.7769, 106.7009);
 
-/// Khóa cho Places + Geocoding REST API:
-/// `flutter run --dart-define=PLACES_API_KEY=your_key`.
-const String _kPlacesApiKey = String.fromEnvironment(
-  'PLACES_API_KEY',
-  defaultValue: '',
-);
-
 /// C4 tuỳ chọn: `flutter run --dart-define=DIRECTIONS_API_KEY=your_key`.
-/// Nếu không truyền riêng thì fallback dùng `PLACES_API_KEY`.
 const String _kDirectionsApiKey = String.fromEnvironment(
   'DIRECTIONS_API_KEY',
-  defaultValue: _kPlacesApiKey,
+  defaultValue: '',
 );
-
-enum _SearchTarget { pickup, dropoff }
-
-class _AddressSearchBottomSheet extends StatefulWidget {
-  const _AddressSearchBottomSheet({
-    required this.service,
-    required this.target,
-    required this.near,
-  });
-
-  final PlacesSearchService service;
-  final _SearchTarget target;
-  final LatLng? near;
-
-  @override
-  State<_AddressSearchBottomSheet> createState() =>
-      _AddressSearchBottomSheetState();
-}
-
-class _AddressSearchBottomSheetState extends State<_AddressSearchBottomSheet> {
-  late final TextEditingController _controller;
-  List<PlaceSuggestion> _suggestions = const [];
-  bool _loading = false;
-  String? _error;
-  Timer? _debounce;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = TextEditingController();
-  }
-
-  @override
-  void dispose() {
-    _debounce?.cancel();
-    _controller.dispose();
-    super.dispose();
-  }
-
-  Future<void> _lookup(String input) async {
-    if (input.trim().isEmpty) {
-      setState(() {
-        _loading = false;
-        _error = null;
-        _suggestions = const [];
-      });
-      return;
-    }
-    setState(() {
-      _loading = true;
-      _error = null;
-    });
-    final results = await widget.service.autocomplete(
-      input,
-      around: widget.near,
-    );
-    if (!mounted) return;
-    setState(() {
-      _loading = false;
-      _suggestions = results;
-      if (results.isEmpty) {
-        _error = 'Không thấy gợi ý phù hợp.';
-      }
-    });
-  }
-
-  void _onChanged(String value) {
-    _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 350), () {
-      _lookup(value);
-    });
-  }
-
-  Future<void> _pickSuggestion(PlaceSuggestion suggestion) async {
-    setState(() => _loading = true);
-    final resolved = await widget.service.resolvePlaceId(suggestion.placeId);
-    if (!mounted) return;
-    if (resolved == null) {
-      setState(() {
-        _loading = false;
-        _error = 'Không lấy được tọa độ từ gợi ý đã chọn.';
-      });
-      return;
-    }
-    Navigator.of(context).pop<AddressSearchResult>(resolved);
-  }
-
-  Future<void> _geocodeTypedAddress() async {
-    final raw = _controller.text.trim();
-    if (raw.isEmpty) return;
-    setState(() {
-      _loading = true;
-      _error = null;
-    });
-    final resolved = await widget.service.geocodeText(raw);
-    if (!mounted) return;
-    if (resolved == null) {
-      setState(() {
-        _loading = false;
-        _error = 'Không geocode được địa chỉ này.';
-      });
-      return;
-    }
-    Navigator.of(context).pop<AddressSearchResult>(resolved);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final targetLabel = widget.target == _SearchTarget.pickup
-        ? 'điểm đón'
-        : 'điểm đến';
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: EdgeInsets.only(
-          left: 16,
-          right: 16,
-          top: 16,
-          bottom: MediaQuery.of(context).viewInsets.bottom + 16,
-        ),
-        child: SizedBox(
-          height: 460,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'Tìm $targetLabel',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 10),
-              TextField(
-                controller: _controller,
-                autofocus: true,
-                textInputAction: TextInputAction.search,
-                onChanged: _onChanged,
-                onSubmitted: (_) => _geocodeTypedAddress(),
-                decoration: InputDecoration(
-                  hintText: 'Nhập địa chỉ, tên địa điểm...',
-                  border: const OutlineInputBorder(),
-                  suffixIcon: IconButton(
-                    onPressed: _geocodeTypedAddress,
-                    icon: const Icon(Icons.search),
-                    tooltip: 'Tìm theo địa chỉ nhập',
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
-              FilledButton.tonalIcon(
-                onPressed: _loading ? null : _geocodeTypedAddress,
-                icon: const Icon(Icons.pin_drop_outlined),
-                label: const Text('Dùng đúng địa chỉ vừa nhập'),
-              ),
-              const SizedBox(height: 10),
-              if (_loading) const LinearProgressIndicator(),
-              if (_error != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Text(
-                    _error!,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                  ),
-                ),
-              const SizedBox(height: 8),
-              Expanded(
-                child: _suggestions.isEmpty
-                    ? const Center(
-                        child: Text('Gõ vài ký tự để xem gợi ý địa điểm.'),
-                      )
-                    : ListView.separated(
-                        itemCount: _suggestions.length,
-                        separatorBuilder: (_, _) => const Divider(height: 1),
-                        itemBuilder: (context, index) {
-                          final item = _suggestions[index];
-                          return ListTile(
-                            dense: true,
-                            leading: const Icon(Icons.location_on_outlined),
-                            title: Text(
-                              item.mainText,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            subtitle: Text(
-                              item.secondaryText.isNotEmpty
-                                  ? item.secondaryText
-                                  : item.fullText,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            onTap: () => _pickSuggestion(item),
-                          );
-                        },
-                      ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 class MapBookingScreen extends StatefulWidget {
   const MapBookingScreen({super.key});
@@ -365,9 +152,6 @@ class MapBookingScreen extends StatefulWidget {
 }
 
 class _MapBookingScreenState extends State<MapBookingScreen> {
-  final PlacesSearchService _placesService = PlacesSearchService(
-    _kPlacesApiKey,
-  );
   GoogleMapController? _mapController;
 
   /// GPS lần đọc gần nhất — không đổi khi user chạm map (đáp ứng C2: marker “vị trí hiện tại”).
@@ -375,8 +159,6 @@ class _MapBookingScreenState extends State<MapBookingScreen> {
   // C3: tọa độ đặt xe — StatefulWidget (không dùng Provider cho map state).
   LatLng? _pickup;
   LatLng? _dropoff;
-  String? _pickupLabel;
-  String? _dropoffLabel;
 
   /// `false` = chạm map đặt điểm đón (xanh); `true` = chạm map đặt điểm đến (đỏ).
   bool _selectingDropoff = false;
@@ -537,44 +319,8 @@ class _MapBookingScreenState extends State<MapBookingScreen> {
     });
   }
 
-  Future<void> _openAddressSearch(_SearchTarget target) async {
-    if (_kPlacesApiKey.isEmpty) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Thiếu PLACES_API_KEY. Chạy lại app với --dart-define=PLACES_API_KEY=...',
-          ),
-        ),
-      );
-      return;
-    }
-
-    final picked = await showModalBottomSheet<AddressSearchResult>(
-      context: context,
-      isScrollControlled: true,
-      builder: (_) => _AddressSearchBottomSheet(
-        service: _placesService,
-        target: target,
-        near: _pickup ?? _deviceLocation,
-      ),
-    );
-    if (picked == null || !mounted) return;
-
-    setState(() {
-      if (target == _SearchTarget.pickup) {
-        _pickup = picked.position;
-        _pickupLabel = picked.label;
-      } else {
-        _dropoff = picked.position;
-        _dropoffLabel = picked.label;
-      }
-    });
-    await _mapController?.animateCamera(
-      CameraUpdate.newLatLngZoom(picked.position, 15),
-    );
-    _afterStopsUpdated();
-  }
+  static String _coordSnippet(LatLng p) =>
+      '${p.latitude.toStringAsFixed(5)}, ${p.longitude.toStringAsFixed(5)}';
 
   /// Marker: Azure = GPS (C2); xanh = pickup, đỏ = dropoff (C3).
   Set<Marker> get _markers {
@@ -599,7 +345,10 @@ class _MapBookingScreenState extends State<MapBookingScreen> {
           icon: BitmapDescriptor.defaultMarkerWithHue(
             BitmapDescriptor.hueGreen,
           ),
-          infoWindow: InfoWindow(title: 'Điểm đón', snippet: _pickupLabel),
+          infoWindow: InfoWindow(
+            title: 'Điểm đón',
+            snippet: _coordSnippet(_pickup!),
+          ),
         ),
       );
     }
@@ -609,7 +358,10 @@ class _MapBookingScreenState extends State<MapBookingScreen> {
           markerId: const MarkerId('dropoff'),
           position: _dropoff!,
           icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-          infoWindow: InfoWindow(title: 'Điểm đến', snippet: _dropoffLabel),
+          infoWindow: InfoWindow(
+            title: 'Điểm đến',
+            snippet: _coordSnippet(_dropoff!),
+          ),
         ),
       );
     }
@@ -726,10 +478,8 @@ class _MapBookingScreenState extends State<MapBookingScreen> {
             setState(() {
               if (_selectingDropoff) {
                 _dropoff = pos;
-                _dropoffLabel = null;
               } else {
                 _pickup = pos;
-                _pickupLabel = null;
               }
             });
             _afterStopsUpdated();
@@ -774,24 +524,6 @@ class _MapBookingScreenState extends State<MapBookingScreen> {
                       ),
                     ),
                   ],
-                  if (_pickupLabel != null) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      'Điểm đón: $_pickupLabel',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                  ],
-                  if (_dropoffLabel != null) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      'Điểm đến: $_dropoffLabel',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                  ],
                   const SizedBox(height: 8),
                   Row(
                     children: [
@@ -815,35 +547,11 @@ class _MapBookingScreenState extends State<MapBookingScreen> {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () =>
-                              _openAddressSearch(_SearchTarget.pickup),
-                          icon: const Icon(Icons.search),
-                          label: const Text('Tìm điểm đón'),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () =>
-                              _openAddressSearch(_SearchTarget.dropoff),
-                          icon: const Icon(Icons.search),
-                          label: const Text('Tìm điểm đến'),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
                   OutlinedButton(
                     onPressed: () {
                       setState(() {
                         _pickup = null;
                         _dropoff = null;
-                        _pickupLabel = null;
-                        _dropoffLabel = null;
                         _selectingDropoff = false;
                         _directionsPoints = null;
                         _directionsLoading = false;

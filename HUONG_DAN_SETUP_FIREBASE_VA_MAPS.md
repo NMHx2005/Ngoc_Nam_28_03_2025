@@ -137,15 +137,13 @@ Google Maps Platform thường **yêu cầu** tài khoản thanh toán (billing)
 - Đây là yêu cầu chống lạm dụng; đồ án nhỏ thường nằm trong **hạn mức miễn phí / credit** của Maps (xem [Pricing](https://developers.google.com/maps/billing-and-pricing/pricing)).
 - Nên tạo **Budget + cảnh báo** (Billing → Budgets) để tránh bất ngờ.
 
-### B2. Bật API: Maps SDK for Android (+ API tuỳ chọn cho tìm địa chỉ)
+### B2. Bật API: Maps SDK for Android (+ Directions tuỳ chọn)
 
 1. **APIs & Services** → **Library** (Thư viện).
 2. Tìm **`Maps SDK for Android`**.
 3. Vào kết quả → **Enable** (Bật).
-4. Nếu muốn tìm địa chỉ bằng văn bản trong app, bật thêm:
-   - **Places API**
-   - **Geocoding API**
-5. Nếu muốn vẽ lộ trình đường bộ, bật thêm:
+4. Bản demo hiện **chỉ chọn điểm đón/đến bằng chạm bản đồ** — không cần Places / Geocoding.
+5. Nếu muốn vẽ lộ trình đường bộ (polyline theo đường đi), bật thêm:
    - **Directions API**
 
 **Quan trọng:** Phải **Enable** API này **trước**, khi hạn chế API key (B4) mới thấy tên **Maps SDK for Android** trong danh sách.
@@ -211,22 +209,19 @@ Google Maps Platform thường **yêu cầu** tài khoản thanh toán (billing)
 2. **Đăng ký** tài khoản mới → **đăng nhập** → tab **Bản đồ** hiển thị bản đồ (không xám toàn màn hình).
 3. **Đặt xe** → Firebase Console → **Firestore** → **Data** → collection **`trips`** có document mới.
 
-### C1. Chạy kèm key cho tìm địa chỉ / route (tuỳ chọn)
+### C1. Chạy kèm key Directions (tuỳ chọn — vẽ route đường bộ)
 
 ```bash
-flutter run \
-  --dart-define=PLACES_API_KEY=YOUR_KEY_HERE \
-  --dart-define=DIRECTIONS_API_KEY=YOUR_KEY_HERE
+flutter run --dart-define=DIRECTIONS_API_KEY=YOUR_KEY_HERE
 ```
 
-Nếu chỉ cần tìm địa chỉ, có thể bỏ `DIRECTIONS_API_KEY`.
+Cần bật **Directions API** và dùng key có quyền gọi API đó (xem README).
 
 ### Lỗi thường gặp
 
 | Hiện tượng | Hướng xử lý |
 |------------|-------------|
 | Map trắng / “API key not valid” | Kiểm tra key trong `api_keys.xml`, đã Enable **Maps SDK for Android**, billing đã bật, **Application restrictions** đúng package + SHA-1 debug đang dùng để cài app. |
-| Gõ địa chỉ nhưng không có gợi ý | Kiểm tra đã truyền `--dart-define=PLACES_API_KEY=...`, key có quyền **Places API** + **Geocoding API**, và chưa bị giới hạn API sai. |
 | `PERMISSION_DENIED` Firestore | Đã **Publish** `firestore.rules`? User đã **đăng nhập**? `userId` trong document có khớp `uid` không? |
 | Auth lỗi | **Email/Password** đã bật? `google-services.json` đúng project + đúng package? |
 

@@ -7,7 +7,7 @@ import 'package:http/http.dart' as http;
 /// C4 — Tuỳ chọn: lấy lộ trình đường bộ qua **Directions API** (REST).
 ///
 /// **Bật API:** Google Cloud Console → APIs & Services → bật *Directions API*.
-/// **Key:** nên dùng key riêng hoặc cùng Maps; restrict phù hợp (REST / IP / app).
+/// **Key:** truyền `--dart-define=DIRECTIONS_API_KEY`; restrict phù hợp trên GCP.
 ///
 /// Request mẫu (GET):
 /// `https://maps.googleapis.com/maps/api/directions/json?origin=10.77,106.70&destination=10.79,106.71&mode=driving&key=YOUR_KEY`

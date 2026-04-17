@@ -16,6 +16,7 @@ class TripHistoryScreen extends StatelessWidget {
       case TripStatuses.findingDriver:
         return Colors.orange.shade700;
       case TripStatuses.accepted:
+      case TripStatuses.driverArriving:
       case TripStatuses.inProgress:
         return Colors.blue.shade700;
       case TripStatuses.completed:
@@ -33,6 +34,8 @@ class TripHistoryScreen extends StatelessWidget {
         return 'Tìm xe';
       case TripStatuses.accepted:
         return 'Đã nhận';
+      case TripStatuses.driverArriving:
+        return 'Đang đến';
       case TripStatuses.inProgress:
         return 'Đang đi';
       case TripStatuses.completed:
